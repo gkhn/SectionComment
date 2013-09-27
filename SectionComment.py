@@ -18,7 +18,7 @@ def build_comment_data(view, pt):
     block_comments = []
 
     # transform the dict into a single array of valid comments
-    suffixes = [""] + ["_" + str(i) for i in xrange(1, 10)]
+    suffixes = [""] + ["_" + str(i) for i in range(1, 10)]
     for suffix in suffixes:
         start = all_vars.setdefault("TM_COMMENT_START" + suffix)
         end = all_vars.setdefault("TM_COMMENT_END" + suffix)
