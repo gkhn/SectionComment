@@ -1,14 +1,54 @@
 import sublime, sublime_plugin
 import re, collections
 
+syntax_data = []
+
+def build_comment_data(view, pt):
+    shell_vars = view.meta_info("shellVariables", pt)
+    if not shell_vars:
+        return ([], [])
+
+    # transform the list of dicts into a single dict
+    all_vars = {}
+    for v in shell_vars:
+        if 'name' in v and 'value' in v:
+            all_vars[v['name']] = v['value']
+
+    line_comments = []
+    block_comments = []
+
+    # transform the dict into a single array of valid comments
+    suffixes = [""] + ["_" + str(i) for i in xrange(1, 10)]
+    for suffix in suffixes:
+        start = all_vars.setdefault("TM_COMMENT_START" + suffix)
+        end = all_vars.setdefault("TM_COMMENT_END" + suffix)
+        mode = all_vars.setdefault("TM_COMMENT_MODE" + suffix)
+        disable_indent = all_vars.setdefault("TM_COMMENT_DISABLE_INDENT" + suffix)
+
+        if start and end:
+            block_comments.append((start, end, disable_indent == 'yes'))
+            block_comments.append((start.strip(), end.strip(), disable_indent == 'yes'))
+        elif start:
+            line_comments.append((start, disable_indent == 'yes'))
+            line_comments.append((start.strip(), disable_indent == 'yes'))
+
+    return (line_comments, block_comments)
+
 class SectionCommentCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		self.edit = edit
 		self.view.window().show_input_panel("Please name your section", "", self.on_done, None, None)
 
 	def on_done(self, user_input):
-		self.view.run_command("section_comment_insert", {"user_input": user_input})
-		
+		self.view.run_command("check_syntax", {"user_input": user_input})
+
+class CheckSyntax(sublime_plugin.TextCommand):
+	def run(self, edit, user_input):
+		for region in self.view.sel():
+			global syntax_data
+			syntax_data = build_comment_data(self.view, region.begin())
+			self.view.run_command("section_comment_insert", {"user_input": user_input})
+	
 class SectionCommentInsert(sublime_plugin.TextCommand):
 	letters = collections.defaultdict(dict)
 	letters['a'][0] = "   ###     "
@@ -315,10 +355,34 @@ class SectionCommentInsert(sublime_plugin.TextCommand):
 	letters[' '][5] = "     "
 	letters[' '][6] = "     "
 	def run(self, edit, user_input):
+		has_line = len(syntax_data[0]) > 0
+		has_block = len(syntax_data[1]) > 0
+		if has_block:
+			block_prefix = syntax_data[1][0][0]
+			block_suffix = syntax_data[1][0][1]
+		elif has_line:
+			line_prefix = syntax_data[0][0][0]
+		else:
+			has_block = True
+			block_prefix = "/*"
+			block_suffix = "*/"
+
 		user_input = re.sub(r'[^a-z0-9 -]', r'', user_input.lower())
 		user_comment = ""
+		t = -1
 		for l in range(0,7):
 			for i, c in enumerate(user_input):
-				user_comment += self.letters[c][l]
-			user_comment += "\n"
-		self.view.insert(edit, self.view.sel()[0].begin(), "/*\n" + user_comment + "*/")
+				if not has_block and t != l:
+					user_comment += line_prefix + " " + self.letters[c][l]
+				else:
+					user_comment += self.letters[c][l]
+				t = l
+			
+			if l != 6:
+				user_comment += "\n"
+		if has_block:
+			comment_data = block_prefix + "\n" + user_comment + "\n" + block_suffix
+		else:
+			comment_data = user_comment
+
+		self.view.insert(edit, self.view.sel()[0].begin(), comment_data)
