@@ -1,0 +1,3 @@
+[
+	{ "keys": ["super+option+c"], "command": "section_comment" }
+]
