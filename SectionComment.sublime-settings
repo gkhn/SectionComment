@@ -1,0 +1,6 @@
+/*
+    SectionComment default settings
+*/
+{
+    "prefer_line_comments" : false
+}
