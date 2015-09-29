@@ -355,8 +355,16 @@ class SectionCommentInsert(sublime_plugin.TextCommand):
 	letters[' '][5] = "     "
 	letters[' '][6] = "     "
 	def run(self, edit, user_input):
+		plugin_settings_file = "SectionComment.sublime-settings"
+		plugin_settings = sublime.load_settings(plugin_settings_file)
+
+		prefer_line_comments = plugin_settings.get("prefer_line_comments")
+
 		has_line = len(syntax_data[0]) > 0
 		has_block = len(syntax_data[1]) > 0
+
+		if(prefer_line_comments and has_line): has_block = 0
+
 		if has_block:
 			block_prefix = syntax_data[1][0][0]
 			block_suffix = syntax_data[1][0][1]
