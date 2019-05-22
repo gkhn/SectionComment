@@ -1,6 +1,30 @@
 /*
+
+ ######   ########  ########  ########  ########  ##    ##   ######    ######
+##    ##  ##           ##        ##        ##     ###   ##  ##    ##  ##    ##
+##        ##           ##        ##        ##     ####  ##  ##        ##
+ ######   ######       ##        ##        ##     ## ## ##  ##  ####   ######
+      ##  ##           ##        ##        ##     ##  ####  ##    ##        ##
+##    ##  ##           ##        ##        ##     ##   ###  ##    ##  ##    ##
+ ######   ########     ##        ##     ########  ##    ##   ######    ######
+
     SectionComment default settings
+
+    prefer_line_coments: true | false
+    	For languages that have block and line comments, use line comment style
+
+    letter_spacing: > 1
+    	The number of space chars to place between ASCII art letters
+
+    space_size: > 3
+    	The number of space chars to use for a space between words
+
+    fill_char: any char
+    	The char used to fill ASCII art letters
 */
 {
-    "prefer_line_comments" : false
+    "prefer_line_comments" : false,
+    "letter_spacing": 2,
+    "space_size": 5,
+    "fill_char": "#"
 }
