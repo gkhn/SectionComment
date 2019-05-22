@@ -355,6 +355,14 @@ class SectionCommentInsert(sublime_plugin.TextCommand):
 	letters['+'][5] = "   ##   "
 	letters['+'][6] = "        "
 
+	letters['='][0] = "        "
+	letters['='][1] = "        "
+	letters['='][2] = "########"
+	letters['='][3] = "        "
+	letters['='][4] = "########"
+	letters['='][5] = "        "
+	letters['='][6] = "        "
+
 	letters['_'][0] = "        "
 	letters['_'][1] = "        "
 	letters['_'][2] = "        "
